@@ -12,6 +12,8 @@ import {
   updateStrategy,
   recordTrade,
 } from "./db";
+import { marketRouter } from "./marketRouter";
+import { liveTradeRouter } from "./liveTradeRouter";
 
 export const appRouter = router({
   system: systemRouter,
@@ -26,6 +28,12 @@ export const appRouter = router({
       } as const;
     }),
   }),
+
+  // 行情数据路由
+  market: marketRouter,
+
+  // 实盘交易路由
+  liveTrade: liveTradeRouter,
 
   // 交易相关路由
   trading: router({
