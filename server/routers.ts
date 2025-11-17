@@ -14,9 +14,13 @@ import {
 } from "./db";
 import { marketRouter } from "./marketRouter";
 import { liveTradeRouter } from "./liveTradeRouter";
+import { testLoginRouter } from "./testLoginRouter";
 
 export const appRouter = router({
   system: systemRouter,
+
+  // 测试登录路由
+  testAuth: testLoginRouter,
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
