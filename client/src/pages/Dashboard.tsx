@@ -1,146 +1,91 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { trpc } from "@/lib/trpc";
-import { Loader2, TrendingUp, Wallet, BarChart3 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BarChart3, TrendingUp, Wallet } from "lucide-react";
+import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { Link } from "wouter";
-import { getLoginUrl } from "@/const";
+
+interface AccountInfo {
+  balance: number;
+  totalAssets: number;
+  profitRate: number;
+}
 
 export default function Dashboard() {
-  const { user, isAuthenticated } = useAuth();
-  const [initialBalance] = useState(100000000); // 默认100万
+  const [, navigate] = useLocation();
+  const [account, setAccount] = useState<AccountInfo>({
+    balance: 100000000,
+    totalAssets: 100000000,
+    profitRate: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
-  // 获取账户信息
-  const { data: account, isLoading: accountLoading } = trpc.trading.getAccount.useQuery(
-    { initialBalance },
-    { enabled: isAuthenticated }
-  );
+  useEffect(() => {
+    // 模拟加载账户数据
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
+  }, []);
 
-  // 获取策略列表
-  const { data: strategies, isLoading: strategiesLoading } = trpc.trading.getStrategies.useQuery(
-    undefined,
-    { enabled: isAuthenticated }
-  );
-
-  // 获取持仓
-  const { data: positions, isLoading: positionsLoading } = trpc.trading.getPositions.useQuery(
-    undefined,
-    { enabled: isAuthenticated }
-  );
-
-  // 获取交易记录
-  const { data: trades, isLoading: tradesLoading } = trpc.trading.getTrades.useQuery(
-    { limit: 5 },
-    { enabled: isAuthenticated }
-  );
-
-  // 处理登录
-  const handleLogin = () => {
-    try {
-      const url = getLoginUrl();
-      window.location.href = url;
-    } catch (error) {
-      console.error("登录错误:", error);
-      alert("登录配置错误，请刷新页面重试");
-    }
-  };
-
-  // 测试登录
-  const handleTestLogin = async () => {
-    try {
-      const response = await fetch("/api/trpc/testAuth.testLogin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({}),
-      });
-      
-      if (response.ok) {
-        // 登录成功，刷新页面
-        window.location.reload();
-      } else {
-        alert("测试登录失败");
-      }
-    } catch (error) {
-      console.error("测试登录错误:", error);
-      alert("测试登录失败");
-    }
-  };
-
-  if (!isAuthenticated) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">A股自动交易系统</CardTitle>
-            <CardDescription>智能策略驱动的股票交易平台</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600">
-              欢迎使用A股自动交易系统。请登录以开始使用。
-            </p>
-            <button
-              onClick={handleTestLogin}
-              className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition-colors"
-              type="button"
-            >
-              测试登录
-            </button>
-            <p className="text-xs text-gray-500 text-center mt-3">
-              或 <button onClick={handleLogin} className="text-blue-600 hover:underline">OAuth登录</button>
-            </p>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">加载中...</p>
+        </div>
       </div>
     );
   }
 
-  const isLoading = accountLoading || strategiesLoading || positionsLoading || tradesLoading;
-
-  // 计算账户总资产
-  const totalAssets = account?.totalAssets || 0;
-  const currentBalance = account?.currentBalance || 0;
-  const profitLoss = (totalAssets - initialBalance) || 0;
-  const profitRate = initialBalance > 0 ? ((profitLoss / initialBalance) * 100).toFixed(2) : "0.00";
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* 顶部信息卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {/* 账户余额 */}
+    <div className="min-h-screen bg-gray-50">
+      {/* 顶部导航 */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">A股自动交易系统</h1>
+          <div className="text-sm text-gray-600">本地版本</div>
+        </div>
+      </div>
+
+      {/* 主内容 */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* 账户信息卡片 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">账户余额</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">账户余额</CardTitle>
+              <Wallet className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">¥{currentBalance.toFixed(2)}</div>
+              <div className="text-2xl font-bold">
+                ¥{(account.balance / 100000000).toFixed(2)}亿
+              </div>
               <p className="text-xs text-gray-500 mt-1">可用资金</p>
             </CardContent>
           </Card>
 
-          {/* 总资产 */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">总资产</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">总资产</CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">¥{totalAssets.toFixed(2)}</div>
-              <p className="text-xs text-gray-500 mt-1">初始: ¥{initialBalance.toFixed(2)}</p>
+              <div className="text-2xl font-bold">
+                ¥{(account.totalAssets / 100000000).toFixed(2)}亿
+              </div>
+              <p className="text-xs text-gray-500 mt-1">初始: ¥1.00亿</p>
             </CardContent>
           </Card>
 
-          {/* 收益率 */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">收益率</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">收益率</CardTitle>
+              <BarChart3 className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${profitLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
-                {profitRate}%
+              <div className={`text-2xl font-bold ${account.profitRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {account.profitRate >= 0 ? '+' : ''}{account.profitRate.toFixed(2)}%
               </div>
               <p className="text-xs text-gray-500 mt-1">相对初始资金</p>
             </CardContent>
@@ -152,98 +97,66 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle>快速操作</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-3">
-            <Link href="/strategies">
-              <Button variant="default" className="gap-2">
-                <BarChart3 className="w-4 h-4" />
-                管理策略
-              </Button>
-            </Link>
-            <Link href="/positions">
-              <Button variant="outline" className="gap-2">
-                <Wallet className="w-4 h-4" />
-                查看持仓
-              </Button>
-            </Link>
-            <Link href="/trades">
-              <Button variant="outline" className="gap-2">
-                <TrendingUp className="w-4 h-4" />
-                交易记录
-              </Button>
-            </Link>
+          <CardContent className="flex flex-wrap gap-4">
+            <Button 
+              onClick={() => navigate('/strategies', { replace: false })}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              📊 管理策略
+            </Button>
+            <Button 
+              onClick={() => navigate('/positions', { replace: false })}
+              variant="outline"
+            >
+              📈 查看持仓
+            </Button>
+            <Button 
+              onClick={() => navigate('/trades', { replace: false })}
+              variant="outline"
+            >
+              📝 交易记录
+            </Button>
           </CardContent>
         </Card>
 
-        {/* 策略概览 */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>我的策略</CardTitle>
-            <CardDescription>共 {strategies?.length || 0} 个策略</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {strategiesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
-            ) : strategies && strategies.length > 0 ? (
-              <div className="space-y-2">
-                {strategies.slice(0, 3).map((strategy: any) => (
-                  <div key={strategy.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium">{strategy.name}</p>
-                      <p className="text-sm text-gray-500">{strategy.description}</p>
-                    </div>
-                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                      strategy.enabled ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                    }`}>
-                      {strategy.enabled ? "启用" : "禁用"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">暂无策略</p>
-                <Link href="/strategies">
-                  <Button variant="link" className="mt-2">创建一个</Button>
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* 最近交易 */}
+        {/* 主要内容区域 */}
         <Card>
           <CardHeader>
-            <CardTitle>最近交易</CardTitle>
+            <CardTitle>功能导航</CardTitle>
           </CardHeader>
           <CardContent>
-            {tradesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin" />
-              </div>
-            ) : trades && trades.length > 0 ? (
-              <div className="space-y-2">
-                {trades.map((trade: any) => (
-                  <div key={trade.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                    <div>
-                      <p className="font-medium">{trade.symbol}</p>
-                      <p className="text-sm text-gray-500">{new Date(trade.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-semibold ${trade.action === "BUY" ? "text-red-600" : "text-green-600"}`}>
-                        {trade.action === "BUY" ? "买入" : "卖出"} {trade.quantity}
-                      </p>
-                      <p className="text-sm text-gray-500">¥{trade.price.toFixed(2)}</p>
-                    </div>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList>
+                <TabsTrigger value="overview">概览</TabsTrigger>
+                <TabsTrigger value="features">功能说明</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="overview" className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-blue-900 mb-2">欢迎使用A股自动交易系统</h3>
+                  <p className="text-sm text-blue-800">
+                    这是一个本地化的股票交易模拟系统。您可以创建交易策略、模拟交易、查看持仓和交易记录。
+                  </p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="features" className="space-y-4">
+                <div className="space-y-3">
+                  <div className="border-l-4 border-blue-600 pl-4">
+                    <h4 className="font-semibold text-gray-900">📊 策略管理</h4>
+                    <p className="text-sm text-gray-600">创建和管理自动交易策略，支持技术指标和自定义规则</p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">暂无交易记录</p>
-              </div>
-            )}
+                  <div className="border-l-4 border-green-600 pl-4">
+                    <h4 className="font-semibold text-gray-900">📈 持仓管理</h4>
+                    <p className="text-sm text-gray-600">实时查看当前持仓、成本价、盈亏等信息</p>
+                  </div>
+                  <div className="border-l-4 border-purple-600 pl-4">
+                    <h4 className="font-semibold text-gray-900">📝 交易记录</h4>
+                    <p className="text-sm text-gray-600">查看历史交易记录和交易统计分析</p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
