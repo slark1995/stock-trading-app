@@ -15,6 +15,7 @@ import {
 import { marketRouter } from "./marketRouter";
 import { liveTradeRouter } from "./liveTradeRouter";
 import { testLoginRouter } from "./testLoginRouter";
+import { brokerRouter } from "./brokerRouter";
 
 export const appRouter = router({
   system: systemRouter,
@@ -38,6 +39,9 @@ export const appRouter = router({
 
   // 实盘交易路由
   liveTrade: liveTradeRouter,
+
+  // 券商连接路由
+  broker: brokerRouter,
 
   // 交易相关路由
   trading: router({

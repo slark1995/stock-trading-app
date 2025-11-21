@@ -99,6 +99,12 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-4">
             <Button 
+              onClick={() => navigate('/account', { replace: false })}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              🔗 连接账户
+            </Button>
+            <Button 
               onClick={() => navigate('/strategies', { replace: false })}
               className="bg-blue-600 hover:bg-blue-700"
             >

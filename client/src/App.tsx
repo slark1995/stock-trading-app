@@ -8,12 +8,14 @@ import Dashboard from "./pages/Dashboard";
 import Strategies from "./pages/Strategies";
 import Positions from "./pages/Positions";
 import Trades from "./pages/Trades";
+import AccountLogin from "./pages/AccountLogin";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/account" component={AccountLogin} />
       <Route path="/strategies" component={Strategies} />
       <Route path="/positions" component={Positions} />
       <Route path="/trades" component={Trades} />
